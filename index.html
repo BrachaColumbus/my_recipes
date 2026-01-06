@@ -129,7 +129,7 @@
 <script>
     let currentUser = null;
     let isDarkMode = false;
-    let currentRecipeObj = null; // לשמירת המתכון המוצג כרגע
+    let currentRecipeObj = null; 
     const synth = window.speechSynthesis;
 
     const masterRecipes = [
@@ -171,16 +171,23 @@
     function renderRecipes() {
         const list = document.getElementById('recipeList');
         const query = document.getElementById('searchInput').value.toLowerCase();
-        const recipes = JSON.parse(localStorage.getItem('recipes_' + currentUser.user));
+        const recipes = JSON.parse(localStorage.getItem('recipes_' + currentUser.user)) || [];
+        
         list.innerHTML = '';
-        recipes.forEach((r, index) => {
-            if (r.title.toLowerCase().includes(query)) {
-                const card = document.createElement('div');
-                card.className = 'recipe-card';
-                card.innerHTML = `<img src="${r.img}"><div class="recipe-card-info">${r.title}</div>`;
-                card.onclick = () => openRecipe(r, index);
-                list.appendChild(card);
-            }
+        
+        const filtered = recipes.filter(r => r.title.toLowerCase().includes(query));
+        
+        if (filtered.length === 0) {
+            list.innerHTML = `<p style="text-align:center; opacity:0.6; padding:20px;">לא מצאתי מתכון כזה... 🍳</p>`;
+            return;
+        }
+
+        filtered.forEach((r, index) => {
+            const card = document.createElement('div');
+            card.className = 'recipe-card';
+            card.innerHTML = `<img src="${r.img}"><div class="recipe-card-info">${r.title}</div>`;
+            card.onclick = () => openRecipe(r, index);
+            list.appendChild(card);
         });
     }
 
