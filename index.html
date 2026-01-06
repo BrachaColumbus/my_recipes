@@ -3,42 +3,43 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>השף הקולי - ספר המתכונים המלא</title>
+    <title>השף הקולי - 10 המתכונים שלי</title>
     <style>
-        :root { --primary: #f39c12; --bg: #fdfdfd; --text: #000; --card-bg: #fff; }
-        body { font-family: 'Segoe UI', sans-serif; background-color: var(--bg); color: var(--text); direction: rtl; padding: 10px; margin: 0; }
-        .screen { display: none; max-width: 500px; margin: 20px auto; background: var(--card-bg); padding: 25px; border-radius: 25px; box-shadow: 0 15px 35px rgba(0,0,0,0.1); }
-        .active { display: block; animation: fadeIn 0.5s; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        input, textarea { width: 100%; padding: 14px; margin: 10px 0; border-radius: 12px; border: 1px solid #ddd; box-sizing: border-box; }
-        button { width: 100%; padding: 15px; margin: 10px 0; border-radius: 12px; border: none; font-weight: bold; cursor: pointer; font-size: 16px; }
+        :root { --primary: #f39c12; --bg: #fdfdfd; --text: #000; }
+        body { font-family: 'Segoe UI', sans-serif; background-color: var(--bg); direction: rtl; padding: 10px; margin: 0; }
+        .screen { display: none; max-width: 500px; margin: 20px auto; background: white; padding: 25px; border-radius: 25px; box-shadow: 0 15px 35px rgba(0,0,0,0.1); }
+        .active { display: block; }
+        input { width: 100%; padding: 14px; margin: 10px 0; border-radius: 12px; border: 1px solid #ddd; box-sizing: border-box; }
+        button { width: 100%; padding: 15px; margin: 5px 0; border-radius: 12px; border: none; font-weight: bold; cursor: pointer; font-size: 16px; }
         .main-btn { background: var(--primary); color: white; }
         .secondary-btn { background: #ecf0f1; color: #34495e; }
-        .recipe-grid { display: grid; gap: 15px; margin-top: 10px; }
-        .recipe-card { display: flex; align-items: center; background: #fff; border-radius: 18px; overflow: hidden; border: 1px solid #eee; height: 100px; cursor: pointer; }
+        .recipe-grid { display: grid; gap: 15px; margin-top: 20px; }
+        .recipe-card { display: flex; align-items: center; background: #fff; border-radius: 18px; overflow: hidden; border: 1px solid #eee; height: 100px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
         .recipe-card img { width: 100px; height: 100px; object-fit: cover; }
-        .recipe-card-info { padding: 15px; font-weight: bold; }
+        .recipe-card-info { padding: 15px; font-weight: bold; font-size: 18px; }
     </style>
 </head>
 <body>
 
 <div id="loginScreen" class="screen active">
     <h1 style="text-align:center; color: var(--primary);">🍳 השף הקולי</h1>
+    <p style="text-align:center;">הירשמי פעם אחת, ואז היכנסי:</p>
     <input type="text" id="username" placeholder="שם משתמש">
     <input type="password" id="password" placeholder="סיסמה">
     <button onclick="login()" class="main-btn">כניסה למטבח ✨</button>
-    <button onclick="register()" class="secondary-btn">הרשמה (משתמש חדש)</button>
+    <button onclick="register()" class="secondary-btn">הרשמה (למשתמש חדש)</button>
 </div>
 
 <div id="listScreen" class="screen">
-    <div style="display:flex; justify-content:space-between; align-items:center;">
-        <h2 id="welcomeMsg">המתכונים שלי</h2>
-        <button onclick="location.reload()" style="width:auto; padding:5px 10px; background:red; color:white;">יציאה</button>
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 10px;">
+        <h2 id="welcomeMsg" style="margin:0;">המתכונים שלי</h2>
+        <button onclick="location.reload()" style="width:auto; padding:5px 10px; background:#e74c3c; color:white; font-size:12px;">התנתקות</button>
     </div>
     <div id="recipeList" class="recipe-grid"></div>
 </div>
 
 <script>
+    // רשימת 10 המתכונים המקורית שלך
     const masterRecipes = [
         { title: "חלות שבת אווריריות", img: "https://images.unsplash.com/photo-1620921515233-066989447cc0?w=400" },
         { title: "שניצל זהוב ופריך", img: "https://images.unsplash.com/photo-1594834712647-3c933b9c4746?w=400" },
@@ -61,35 +62,43 @@
         const u = document.getElementById('username').value.trim();
         const p = document.getElementById('password').value;
         if(!u || !p) return alert("נא למלא שם וסיסמה");
-        let users = JSON.parse(localStorage.getItem('users_db')) || [];
-        if(users.find(x => x.u === u)) return alert("המשתמש כבר קיים");
+
+        let users = JSON.parse(localStorage.getItem('users_database')) || [];
+        if(users.find(x => x.u === u)) return alert("השם הזה כבר תפוס");
+
         users.push({u, p});
-        localStorage.setItem('users_db', JSON.stringify(users));
-        alert("נרשמת בהצלחה! עכשיו לחצי על כניסה.");
+        localStorage.setItem('users_database', JSON.stringify(users));
+        alert("נרשמת בהצלחה! עכשיו לחצי על 'כניסה למטבח'");
     }
 
     function login() {
         const u = document.getElementById('username').value.trim();
         const p = document.getElementById('password').value;
-        let users = JSON.parse(localStorage.getItem('users_db')) || [];
+        let users = JSON.parse(localStorage.getItem('users_database')) || [];
+        
         let user = users.find(x => x.u === u && x.p === p);
         if(user) {
             document.getElementById('welcomeMsg').innerText = "המתכונים של " + u;
             renderRecipes();
             showScreen('listScreen');
         } else {
-            alert("פרטים לא נכונים");
+            alert("שם משתמש או סיסמה לא נכונים");
         }
     }
 
     function renderRecipes() {
         const list = document.getElementById('recipeList');
-        list.innerHTML = masterRecipes.map(r => `
-            <div class="recipe-card">
+        list.innerHTML = ''; // מנקה את הרשימה לפני הטעינה
+        
+        masterRecipes.forEach(r => {
+            const card = document.createElement('div');
+            card.className = 'recipe-card';
+            card.innerHTML = `
                 <img src="${r.img}">
                 <div class="recipe-card-info">${r.title}</div>
-            </div>
-        `).join('');
+            `;
+            list.appendChild(card);
+        });
     }
 </script>
 </body>
