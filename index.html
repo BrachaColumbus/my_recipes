@@ -3,84 +3,94 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ספר המתכונים שלי</title>
+    <title>השף הקולי - ספר המתכונים המלא</title>
     <style>
-        body { font-family: sans-serif; background: #f4f4f4; direction: rtl; padding: 20px; text-align: center; }
-        .screen { display: none; max-width: 400px; margin: auto; background: white; padding: 30px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-        .active { display: block; }
-        input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 16px; }
-        button { width: 100%; padding: 12px; margin: 10px 0; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; font-size: 16px; }
-        .login-btn { background: #f39c12; color: white; }
-        .register-btn { background: #bdc3c7; color: #2c3e50; }
-        .recipe-btn { background: #27ae60; color: white; }
+        :root { --primary: #f39c12; --bg: #fdfdfd; --text: #000; --card-bg: #fff; }
+        body { font-family: 'Segoe UI', sans-serif; background-color: var(--bg); color: var(--text); direction: rtl; padding: 10px; margin: 0; }
+        .screen { display: none; max-width: 500px; margin: 20px auto; background: var(--card-bg); padding: 25px; border-radius: 25px; box-shadow: 0 15px 35px rgba(0,0,0,0.1); }
+        .active { display: block; animation: fadeIn 0.5s; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        input, textarea { width: 100%; padding: 14px; margin: 10px 0; border-radius: 12px; border: 1px solid #ddd; box-sizing: border-box; }
+        button { width: 100%; padding: 15px; margin: 10px 0; border-radius: 12px; border: none; font-weight: bold; cursor: pointer; font-size: 16px; }
+        .main-btn { background: var(--primary); color: white; }
+        .secondary-btn { background: #ecf0f1; color: #34495e; }
+        .recipe-grid { display: grid; gap: 15px; margin-top: 10px; }
+        .recipe-card { display: flex; align-items: center; background: #fff; border-radius: 18px; overflow: hidden; border: 1px solid #eee; height: 100px; cursor: pointer; }
+        .recipe-card img { width: 100px; height: 100px; object-fit: cover; }
+        .recipe-card-info { padding: 15px; font-weight: bold; }
     </style>
 </head>
 <body>
 
 <div id="loginScreen" class="screen active">
-    <h1>🍳 השף הקולי</h1>
-    <p>הזינו שם וסיסמה:</p>
-    <input type="text" id="userBox" placeholder="שם משתמש">
-    <input type="password" id="passBox" placeholder="סיסמה">
-    
-    <button onclick="handleLogin()" class="login-btn">כניסה למשתמש קיים</button>
-    <button onclick="handleRegister()" class="register-btn">הרשמה (משתמש חדש)</button>
+    <h1 style="text-align:center; color: var(--primary);">🍳 השף הקולי</h1>
+    <input type="text" id="username" placeholder="שם משתמש">
+    <input type="password" id="password" placeholder="סיסמה">
+    <button onclick="login()" class="main-btn">כניסה למטבח ✨</button>
+    <button onclick="register()" class="secondary-btn">הרשמה (משתמש חדש)</button>
 </div>
 
-<div id="mainScreen" class="screen">
-    <h2 id="helloMsg">שלום!</h2>
-    <button onclick="showScreen('addScreen')" class="recipe-btn">➕ הוספת מתכון חדש</button>
-    <div id="myRecipes"></div>
-    <button onclick="location.reload()" style="background:none; color:red; text-decoration:underline;">התנתקות</button>
-</div>
-
-<div id="addScreen" class="screen">
-    <h2>מתכון חדש</h2>
-    <input type="text" id="recipeTitle" placeholder="שם המתכון">
-    <button onclick="saveRecipe()" class="recipe-btn">שמור מתכון</button>
-    <button onclick="showScreen('mainScreen')" class="register-btn">ביטול</button>
+<div id="listScreen" class="screen">
+    <div style="display:flex; justify-content:space-between; align-items:center;">
+        <h2 id="welcomeMsg">המתכונים שלי</h2>
+        <button onclick="location.reload()" style="width:auto; padding:5px 10px; background:red; color:white;">יציאה</button>
+    </div>
+    <div id="recipeList" class="recipe-grid"></div>
 </div>
 
 <script>
+    const masterRecipes = [
+        { title: "חלות שבת אווריריות", img: "https://images.unsplash.com/photo-1620921515233-066989447cc0?w=400" },
+        { title: "שניצל זהוב ופריך", img: "https://images.unsplash.com/photo-1594834712647-3c933b9c4746?w=400" },
+        { title: "פסטה ברוטב עגבניות", img: "https://images.unsplash.com/photo-1546548970-71785318a17b?w=400" },
+        { title: "מרק עוף אמיתי", img: "https://images.unsplash.com/photo-1547592166-23ac45744acd?w=400" },
+        { title: "סלט יווני עשיר", img: "https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?w=400" },
+        { title: "עוגת שוקולד חמה", img: "https://images.unsplash.com/photo-1564031350635-27c6a2127347?w=400" },
+        { title: "אורז לבן אחד אחד", img: "https://images.unsplash.com/photo-1516684732162-798a0062be99?w=400" },
+        { title: "קציצות ברוטב", img: "https://images.unsplash.com/photo-1529006557810-274b9b2fc783?w=400" },
+        { title: "פיצה ביתית", img: "https://images.unsplash.com/photo-1513104890138-7c749659a591?w=400" },
+        { title: "פנקייק מושלם", img: "https://images.unsplash.com/photo-1528207776546-365bb710ee93?w=400" }
+    ];
+
     function showScreen(id) {
         document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
         document.getElementById(id).classList.add('active');
     }
 
-    // פונקציית הרשמה - יוצרת את המשתמש
-    function handleRegister() {
-        const u = document.getElementById('userBox').value.trim();
-        const p = document.getElementById('passBox').value;
+    function register() {
+        const u = document.getElementById('username').value.trim();
+        const p = document.getElementById('password').value;
         if(!u || !p) return alert("נא למלא שם וסיסמה");
-
-        let users = JSON.parse(localStorage.getItem('myAppUsers')) || [];
-        if(users.find(x => x.name === u)) return alert("השם הזה כבר קיים!");
-
-        users.push({name: u, pass: p});
-        localStorage.setItem('myAppUsers', JSON.stringify(users));
-        alert("נרשמת בהצלחה! עכשיו אפשר ללחוץ על כפתור הכניסה");
+        let users = JSON.parse(localStorage.getItem('users_db')) || [];
+        if(users.find(x => x.u === u)) return alert("המשתמש כבר קיים");
+        users.push({u, p});
+        localStorage.setItem('users_db', JSON.stringify(users));
+        alert("נרשמת בהצלחה! עכשיו לחצי על כניסה.");
     }
 
-    // פונקציית כניסה - בודקת אם את רשומה
-    function handleLogin() {
-        const u = document.getElementById('userBox').value.trim();
-        const p = document.getElementById('passBox').value;
-        let users = JSON.parse(localStorage.getItem('myAppUsers')) || [];
-        
-        let found = users.find(x => x.name === u && x.pass === p);
-        if(found) {
-            document.getElementById('helloMsg').innerText = "שלום, " + u;
-            showScreen('mainScreen');
+    function login() {
+        const u = document.getElementById('username').value.trim();
+        const p = document.getElementById('password').value;
+        let users = JSON.parse(localStorage.getItem('users_db')) || [];
+        let user = users.find(x => x.u === u && x.p === p);
+        if(user) {
+            document.getElementById('welcomeMsg').innerText = "המתכונים של " + u;
+            renderRecipes();
+            showScreen('listScreen');
         } else {
-            alert("שם משתמש או סיסמה לא נכונים. אולי צריך להירשם?");
+            alert("פרטים לא נכונים");
         }
     }
 
-    function saveRecipe() {
-        alert("המתכון נשמר!");
-        showScreen('mainScreen');
+    function renderRecipes() {
+        const list = document.getElementById('recipeList');
+        list.innerHTML = masterRecipes.map(r => `
+            <div class="recipe-card">
+                <img src="${r.img}">
+                <div class="recipe-card-info">${r.title}</div>
+            </div>
+        `).join('');
     }
 </script>
-
 </body>
 </html>
