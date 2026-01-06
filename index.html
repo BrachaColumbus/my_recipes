@@ -73,7 +73,7 @@
     <input type="text" id="username" placeholder="שם משתמש">
     <input type="password" id="password" placeholder="סיסמה">
     <button onclick="login()" class="main-btn">כניסה למטבח ✨</button>
-    <button onclick="register()" class="secondary-btn">הרשמה למשתמש חדש 📝</button>
+    <button onclick="register()" class="secondary-btn">הרשמה (משתמש חדש) 📝</button>
 </div>
 
 <div id="listScreen" class="screen">
@@ -101,12 +101,13 @@
         <button onclick="saveRecipe()" class="main-btn">שמור מתכון</button>
         <button onclick="showScreen('listScreen')" class="secondary-btn">ביטול</button>
     </div>
+    <button id="deleteBtn" onclick="deleteRecipe()" class="danger-btn" style="display:none; margin-top:20px;">🗑️ מחק מתכון לצמיתות</button>
 </div>
 
 <div id="recipeViewScreen" class="screen">
     <img id="viewImg" style="width:100%; height:250px; object-fit:cover; border-radius:20px; margin-bottom:15px;">
     <h2 id="viewTitle" style="font-size: 28px; margin:0;"></h2>
-    <button onclick="editCurrentRecipe()" class="secondary-btn" style="width:auto; padding:5px 15px; font-size:14px; margin-bottom:15px;">✏️ ערוך מתכון</button>
+    <button onclick="editCurrentRecipe()" class="secondary-btn" style="width:auto; padding:5px 15px; font-size:14px; margin-bottom:15px;">✏️ ערוך/מחק מתכון</button>
     
     <div class="ingredients-box">
         <strong style="color:var(--primary);">🛒 מה צריך?</strong><br>
@@ -134,16 +135,16 @@
     const synth = window.speechSynthesis;
 
     const masterRecipes = [
-        { title: "חלות שבת אווריריות", img: "https://images.unsplash.com/photo-1620921515233-066989447cc0?w=400", ingredients: "1 קילו קמח, 2 כפות שמרים, חצי כוס סוכר, כף מלח, חצי כוס שמן, 2.5 כוסות מים", steps: ["מערבבים את כל החומרים היבשים בקערה", "מוסיפים מים ושמן ולשים היטב 10 דקות", "מתפיחים את הבצק במקום חם למשך שעה", "יוצרים צורות של חלה, מתפיחים שוב ואופים"] },
-        { title: "שניצל פריך", img: "https://images.unsplash.com/photo-1594834712647-3c933b9c4746?w=400", ingredients: "חזה עוף פרוס, ביצים, פירורי לחם, מלח ופלפל", steps: ["מכינים צלחת עם ביצה טרופה וצלחת עם פירורי לחם", "טובלים כל נתח עוף בביצה ואז בפירורי הלחם", "מטגנים בשמן חם עד שהשניצל הופך לזהב"] },
-        { title: "פסטה עגבניות", img: "https://images.unsplash.com/photo-1546548970-71785318a17b?w=400", ingredients: "חבילת פסטה, רסק עגבניות, שום, בצל, תבלינים", steps: ["מבשלים את הפסטה לפי הוראות היצרן", "מטגנים בצל ושום ומוסיפים רסק ותבלינים", "מערבבים את הפסטה המוכנה עם הרוטב"] },
-        { title: "מרק עוף עשיר", img: "https://images.unsplash.com/photo-1547592166-23ac45744acd?w=400", ingredients: "חלקי עוף, גזר, קישוא, בצל, סלרי, מלח", steps: ["מכניסים את העוף והירקות לסיר גדול", "ממלאים במים ומביאים לרתיחה", "מבשלים על אש קטנה כשעה וחצי"] },
-        { title: "סלט יווני", img: "https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?w=400", ingredients: "ירקות חתוכים, גבינה בולגרית, זיתים, שמן זית", steps: ["חותכים את כל הירקות לקוביות", "מפזרים מעל גבינה בולגרית וזיתים", "מתבלים בשמן זית ולימון"] },
-        { title: "עוגת שוקולד", img: "https://images.unsplash.com/photo-1564031350635-27c6a2127347?w=400", ingredients: "שוקולד מריר, ביצים, סוכר, קמח", steps: ["ממיסים שוקולד עם חמאה", "מוסיפים סוכר, ביצים וקמח ומערבבים", "אופים ב-180 מעלות כ-25 דקות"] },
-        { title: "אורז לבן מושלם", img: "https://images.unsplash.com/photo-1516684732162-798a0062be99?w=400", ingredients: "כוס אורז, 2 כוסות מים, מלח, שמן", steps: ["מטגנים את האורז עם מעט שמן כשתי דקות", "מוסיפים מים רותחים ומלח", "סוגרים את הסיר ומבשלים על אש קטנה 20 דקות"] },
-        { title: "קציצות ברוטב", img: "https://images.unsplash.com/photo-1529006557810-274b9b2fc783?w=400", ingredients: "בשר טחון, בצל, לחם סחוט, תבלינים, רסק", steps: ["מערבבים את הבשר עם בצל ותבלינים ויוצרים כדורים", "מכינים רוטב עגבניות בסיר רחב", "מבשלים את הקציצות בתוך הרוטב כחצי שעה"] },
-        { title: "פיצה ביתית", img: "https://images.unsplash.com/photo-1513104890138-7c749659a591?w=400", ingredients: "בצק פיצה, רוטב עגבניות, גבינה צהובה", steps: ["מרדדים את הבצק על תבנית אפייה", "מורחים רוטב ומפזרים המון גבינה ותוספות", "אופים בחום גבוה עד שהגבינה מבעבעת"] },
-        { title: "פנקייק", img: "https://images.unsplash.com/photo-1528207776546-365bb710ee93?w=400", ingredients: "כוס חלב, כוס קמח, ביצה, כף סוכר", steps: ["מערבבים את כל המרכיבים לבלילה חלקה", "משמנים מחבת ומטגנים עיגולים קטנים", "הופכים כשמופיעות בועות על הצד העליון"] }
+        { title: "חלות שבת אווריריות", img: "https://images.unsplash.com/photo-1620921515233-066989447cc0?w=400", ing: "1 קילו קמח, 2 כפות שמרים, חצי כוס סוכר, כף מלח, חצי כוס שמן, 2.5 כוסות מים", steps: ["מערבבים את כל החומרים היבשים בקערה", "מוסיפים מים ושמן ולשים היטב 10 דקות", "מתפיחים את הבצק במקום חם למשך שעה", "יוצרים צורות של חלה, מתפיחים שוב ואופים"] },
+        { title: "שניצל פריך", img: "https://images.unsplash.com/photo-1594834712647-3c933b9c4746?w=400", ing: "חזה עוף פרוס, ביצים, פירורי לחם, מלח ופלפל", steps: ["מכינים צלחת עם ביצה טרופה וצלחת עם פירורי לחם", "טובלים כל נתח עוף בביצה ואז בפירורי הלחם", "מטגנים בשמן חם עד שהשניצל הופך לזהב"] },
+        { title: "פסטה עגבניות", img: "https://images.unsplash.com/photo-1546548970-71785318a17b?w=400", ing: "חבילת פסטה, רסק עגבניות, שום, בצל, תבלינים", steps: ["מבשלים את הפסטה לפי הוראות היצרן", "מטגנים בצל ושום ומוסיפים רסק ותבלינים", "מערבבים את הפסטה המוכנה עם הרוטב"] },
+        { title: "מרק עוף עשיר", img: "https://images.unsplash.com/photo-1547592166-23ac45744acd?w=400", ing: "חלקי עוף, גזר, קישוא, בצל, סלרי, מלח", steps: ["מכניסים את העוף והירקות לסיר גדול", "ממלאים במים ומביאים לרתיחה", "מבשלים על אש קטנה כשעה וחצי"] },
+        { title: "סלט יווני", img: "https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?w=400", ing: "ירקות חתוכים, גבינה בולגרית, זיתים, שמן זית", steps: ["חותכים את כל הירקות לקוביות", "מפזרים מעל גבינה בולגרית וזיתים", "מתבלים בשמן זית ולימון"] },
+        { title: "עוגת שוקולד", img: "https://images.unsplash.com/photo-1564031350635-27c6a2127347?w=400", ing: "שוקולד מריר, ביצים, סוכר, קמח", steps: ["ממיסים שוקולד עם חמאה", "מוסיפים סוכר, ביצים וקמח ומערבבים", "אופים ב-180 מעלות כ-25 דקות"] },
+        { title: "אורז לבן מושלם", img: "https://images.unsplash.com/photo-1516684732162-798a0062be99?w=400", ing: "כוס אורז, 2 כוסות מים, מלח, שמן", steps: ["מטגנים את האורז עם מעט שמן כשתי דקות", "מוסיפים מים רותחים ומלח", "סוגרים את הסיר ומבשלים על אש קטנה 20 דקות"] },
+        { title: "קציצות ברוטב", img: "https://images.unsplash.com/photo-1529006557810-274b9b2fc783?w=400", ing: "בשר טחון, בצל, לחם סחוט, תבלינים, רסק", steps: ["מערבבים את הבשר עם בצל ותבלינים ויוצרים כדורים", "מכינים רוטב עגבניות בסיר רחב", "מבשלים את הקציצות בתוך הרוטב כחצי שעה"] },
+        { title: "פיצה ביתית", img: "https://images.unsplash.com/photo-1513104890138-7c749659a591?w=400", ing: "בצק פיצה, רוטב עגבניות, גבינה צהובה", steps: ["מרדדים את הבצק על תבנית אפייה", "מורחים רוטב ומפזרים המון גבינה ותוספות", "אופים בחום גבוה עד שהגבינה מבעבעת"] },
+        { title: "פנקייק", img: "https://images.unsplash.com/photo-1528207776546-365bb710ee93?w=400", ing: "כוס חלב, כוס קמח, ביצה, כף סוכר", steps: ["מערבבים את כל המרכיבים לבלילה חלקה", "משמנים מחבת ומטגנים עיגולים קטנים", "הופכים כשמופיעות בועות על הצד העליון"] }
     ];
 
     function showScreen(id) {
@@ -166,7 +167,7 @@
         
         users.push({ user: u, pass: p, delay: 3 });
         localStorage.setItem('users', JSON.stringify(users));
-        alert("נרשמת בהצלחה! עכשיו תוכלי להיכנס.");
+        alert("נרשמת בהצלחה! כעת הזיני שוב את הפרטים ולחצי על 'כניסה למטבח'.");
     }
 
     function login() {
@@ -177,7 +178,7 @@
         let users = JSON.parse(localStorage.getItem('users')) || [];
         let user = users.find(x => x.user === u && x.pass === p);
         
-        if (!user) return alert("שם משתמש או סיסמה שגויים");
+        if (!user) return alert("שם משתמש או סיסמה שגויים. אולי צריך להירשם קודם?");
 
         currentUser = user;
         document.getElementById('delayInput').value = currentUser.delay;
@@ -217,7 +218,7 @@
         currentRecipeObj = {...r, index: index};
         document.getElementById('viewTitle').innerText = r.title;
         document.getElementById('viewImg').src = r.img;
-        document.getElementById('viewIngredients').innerText = r.ingredients || r.ing;
+        document.getElementById('viewIngredients').innerText = r.ingredients || "";
         document.getElementById('viewInstructions').innerHTML = r.steps.map((s, i) => `<p id="step-${i}">${s}</p>`).join('');
         document.getElementById('viewInstructions').dataset.steps = JSON.stringify(r.steps);
         showScreen('recipeViewScreen');
@@ -230,6 +231,7 @@
         document.getElementById('newImg').value = "";
         document.getElementById('newIngredients').value = "";
         document.getElementById('newSteps').value = "";
+        document.getElementById('deleteBtn').style.display = "none";
         showScreen('addRecipeScreen');
     }
 
@@ -238,8 +240,9 @@
         document.getElementById('editIndex').value = currentRecipeObj.index;
         document.getElementById('newTitle').value = currentRecipeObj.title;
         document.getElementById('newImg').value = currentRecipeObj.img;
-        document.getElementById('newIngredients').value = currentRecipeObj.ingredients || currentRecipeObj.ing;
+        document.getElementById('newIngredients').value = currentRecipeObj.ingredients || "";
         document.getElementById('newSteps').value = currentRecipeObj.steps.join('\n');
+        document.getElementById('deleteBtn').style.display = "block";
         showScreen('addRecipeScreen');
     }
 
@@ -260,6 +263,15 @@
             recipes.push({ title, img, ingredients, steps });
         }
 
+        localStorage.setItem('recipes_' + currentUser.user, JSON.stringify(recipes));
+        renderRecipes();
+        showScreen('listScreen');
+    }
+
+    function deleteRecipe() {
+        if (!confirm("בטוחה שאת רוצה למחוק את המתכון הזה?")) return;
+        let recipes = JSON.parse(localStorage.getItem('recipes_' + currentUser.user));
+        recipes.splice(currentRecipeObj.index, 1);
         localStorage.setItem('recipes_' + currentUser.user, JSON.stringify(recipes));
         renderRecipes();
         showScreen('listScreen');
