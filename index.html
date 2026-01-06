@@ -70,9 +70,20 @@
         <h1 style="color: var(--primary); margin-bottom: 5px;">🍳 השף הקולי</h1>
         <p style="margin-top: 0; opacity: 0.8;">ספר המתכונים האישי שלך</p>
     </div>
-    <input type="text" id="username" placeholder="שם משתמש">
-    <input type="password" id="password" placeholder="סיסמה">
-    <button onclick="login()" class="main-btn">כניסה למטבח ✨</button>
+    <div id="authInputs">
+        <input type="text" id="username" placeholder="שם משתמש">
+        <input type="password" id="password" placeholder="סיסמה">
+        
+        <div id="loginMode">
+            <button onclick="login()" class="main-btn">כניסה למטבח ✨</button>
+            <button onclick="toggleAuthMode(false)" class="secondary-btn">אין לך חשבון? הירשמי כאן</button>
+        </div>
+        
+        <div id="registerMode" style="display:none;">
+            <button onclick="register()" class="main-btn" style="background-color: #27ae60;">צור חשבון חדש ✅</button>
+            <button onclick="toggleAuthMode(true)" class="secondary-btn">כבר רשומה? כניסה</button>
+        </div>
+    </div>
 </div>
 
 <div id="listScreen" class="screen">
@@ -116,20 +127,21 @@
         <button onclick="startReading()" class="main-btn">▶️ הקראה</button>
         <button onclick="stopReading()" class="danger-btn">🛑 עצור</button>
     </div>
-    <button onclick="showScreen('listScreen')" class="secondary-btn">חזור</button>
+    <button onclick="showScreen('listScreen')" class="secondary-btn">חזור לרשימה</button>
 </div>
 
 <div id="settingsScreen" class="screen">
     <h2>⚙️ הגדרות</h2>
     <button onclick="toggleDarkMode()" class="secondary-btn">🌓 מצב יום/לילה</button>
-    <input type="number" id="delayInput" placeholder="זמן המתנה בשניות">
+    <label>זמן המתנה בין שלבים (שניות):</label>
+    <input type="number" id="delayInput" placeholder="זמן המתנה בשניות" value="3">
     <button onclick="showScreen('listScreen')" class="main-btn">שמור וסגור</button>
 </div>
 
 <script>
     let currentUser = null;
     let isDarkMode = false;
-    let currentRecipeObj = null; // לשמירת המתכון המוצג כרגע
+    let currentRecipeObj = null; 
     const synth = window.speechSynthesis;
 
     const masterRecipes = [
@@ -142,28 +154,59 @@
         document.getElementById(id).classList.add('active');
     }
 
+    function toggleAuthMode(isLogin) {
+        document.getElementById('loginMode').style.display = isLogin ? 'block' : 'none';
+        document.getElementById('registerMode').style.display = isLogin ? 'none' : 'block';
+    }
+
     function toggleDarkMode() {
         isDarkMode = !isDarkMode;
         document.body.classList.toggle('dark-mode', isDarkMode);
     }
 
     function login() {
-        const u = document.getElementById('username').value;
+        const u = document.getElementById('username').value.trim();
         const p = document.getElementById('password').value;
         if (!u || !p) return alert("נא להזין שם וסיסמה");
 
         let users = JSON.parse(localStorage.getItem('users')) || [];
-        let user = users.find(x => x.user === u);
-        if (user && user.pass !== p) return alert("סיסמה שגויה");
+        let user = users.find(x => x.user.toLowerCase() === u.toLowerCase());
+
         if (!user) {
-            user = { user: u, pass: p, delay: 3 };
-            users.push(user);
-            localStorage.setItem('users', JSON.stringify(users));
+            return alert("משתמש לא קיים. אנא הירשמי קודם דרך כפתור ההרשמה.");
         }
+        
+        if (user.pass !== p) {
+            return alert("סיסמה שגויה");
+        }
+
+        enterApp(user);
+    }
+
+    function register() {
+        const u = document.getElementById('username').value.trim();
+        const p = document.getElementById('password').value;
+        if (!u || !p) return alert("נא להזין שם וסיסמה להרשמה");
+
+        let users = JSON.parse(localStorage.getItem('users')) || [];
+        if (users.find(x => x.user.toLowerCase() === u.toLowerCase())) {
+            return alert("שם משתמש זה כבר תפוס");
+        }
+
+        const newUser = { user: u, pass: p, delay: 3 };
+        users.push(newUser);
+        localStorage.setItem('users', JSON.stringify(users));
+        alert("נרשמת בהצלחה! עכשיו תוכלי להיכנס.");
+        toggleAuthMode(true);
+    }
+
+    function enterApp(user) {
         currentUser = user;
-        document.getElementById('delayInput').value = currentUser.delay;
-        document.getElementById('welcomeMsg').innerText = `המתכונים של ${u}`;
-        if (!localStorage.getItem('recipes_' + u)) localStorage.setItem('recipes_' + u, JSON.stringify(masterRecipes));
+        document.getElementById('delayInput').value = currentUser.delay || 3;
+        document.getElementById('welcomeMsg').innerText = `המתכונים של ${user.user}`;
+        if (!localStorage.getItem('recipes_' + user.user)) {
+            localStorage.setItem('recipes_' + user.user, JSON.stringify(masterRecipes));
+        }
         renderRecipes();
         showScreen('listScreen');
     }
@@ -171,7 +214,7 @@
     function renderRecipes() {
         const list = document.getElementById('recipeList');
         const query = document.getElementById('searchInput').value.toLowerCase();
-        const recipes = JSON.parse(localStorage.getItem('recipes_' + currentUser.user));
+        const recipes = JSON.parse(localStorage.getItem('recipes_' + currentUser.user)) || [];
         list.innerHTML = '';
         recipes.forEach((r, index) => {
             if (r.title.toLowerCase().includes(query)) {
@@ -216,7 +259,7 @@
 
     function saveRecipe() {
         const title = document.getElementById('newTitle').value;
-        const img = document.getElementById('newImg').value || "https://via.placeholder.com/400?text=Food";
+        const img = document.getElementById('newImg').value || "https://images.unsplash.com/photo-1495147466023-ac5c588e2e94?w=400";
         const ingredients = document.getElementById('newIngredients').value;
         const steps = document.getElementById('newSteps').value.split('\n').filter(s => s.trim() !== '');
         const editIndex = document.getElementById('editIndex').value;
@@ -244,7 +287,11 @@
         function speak() {
             if (i < steps.length) {
                 document.querySelectorAll('#viewInstructions p').forEach(p => p.className = '');
-                document.getElementById(`step-${i}`).className = 'active-step';
+                const stepEl = document.getElementById(`step-${i}`);
+                if(stepEl) {
+                    stepEl.className = 'active-step';
+                    stepEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
                 const u = new SpeechSynthesisUtterance(steps[i]);
                 u.lang = 'he-IL';
                 u.onend = () => { i++; if (i < steps.length) setTimeout(speak, delay); };
