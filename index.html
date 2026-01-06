@@ -73,6 +73,7 @@
     <input type="text" id="username" placeholder="שם משתמש">
     <input type="password" id="password" placeholder="סיסמה">
     <button onclick="login()" class="main-btn">כניסה למטבח ✨</button>
+    <button onclick="register()" class="secondary-btn">הרשמה (משתמש חדש)</button>
 </div>
 
 <div id="listScreen" class="screen">
@@ -133,8 +134,16 @@
     const synth = window.speechSynthesis;
 
     const masterRecipes = [
-        { title: "חלות שבת אווריריות", img: "https://images.unsplash.com/photo-1620921515233-066989447cc0?w=400", ingredients: "1 קילו קמח, 2 כפות שמרים, חצי כוס סוכר, כף מלח, חצי כוס שמן, 2.5 כוסות מים חמימים", steps: ["מערבבים קמח שמרים וסוכר", "מוסיפים מים ושמן ולשים 10 דקות", "מוסיפים מלח ולשים דקה נוספת", "מתפיחים שעה", "קולעים צמות ואופים ב-180 מעלות"] },
-        { title: "שניצל זהוב ופריך", img: "https://images.unsplash.com/photo-1594834712647-3c933b9c4746?w=400", ingredients: "חזה עוף פרוס, 2 ביצים, פירורי לחם זהובים, מלח, פלפל, שום גבישי", steps: ["טורפים ביצים עם מלח ופלפל", "מצפים את העוף בפירורי לחם", "מטגנים בשמן חם עד להזהבה"] }
+        { title: "חלות שבת אווריריות", img: "https://images.unsplash.com/photo-1620921515233-066989447cc0?w=400", ing: "1 קילו קמח, 2 כפות שמרים, חצי כוס סוכר, כף מלח, חצי כוס שמן, 2.5 כוסות מים", steps: ["מערבבים את כל החומרים היבשים בקערה", "מוסיפים מים ושמן ולשים היטב 10 דקות", "מתפיחים את הבצק במקום חם למשך שעה", "יוצרים צורות של חלה, מתפיחים שוב ואופים"] },
+        { title: "שניצל פריך", img: "https://images.unsplash.com/photo-1594834712647-3c933b9c4746?w=400", ing: "חזה עוף פרוס, ביצים, פירורי לחם, מלח ופלפל", steps: ["מכינים צלחת עם ביצה טרופה וצלחת עם פירורי לחם", "טובלים כל נתח עוף בביצה ואז בפירורי הלחם", "מטגנים בשמן חם עד שהשניצל הופך לזהב"] },
+        { title: "פסטה עגבניות", img: "https://images.unsplash.com/photo-1546548970-71785318a17b?w=400", ing: "חבילת פסטה, רסק עגבניות, שום, בצל, תבלינים", steps: ["מבשלים את הפסטה לפי הוראות היצרן", "מטגנים בצל ושום ומוסיפים רסק ותבלינים", "מערבבים את הפסטה המוכנה עם הרוטב"] },
+        { title: "מרק עוף עשיר", img: "https://images.unsplash.com/photo-1547592166-23ac45744acd?w=400", ing: "חלקי עוף, גזר, קישוא, בצל, סלרי, מלח", steps: ["מכניסים את העוף והירקות לסיר גדול", "ממלאים במים ומביאים לרתיחה", "מבשלים על אש קטנה כשעה וחצי"] },
+        { title: "סלט יווני", img: "https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?w=400", ing: "ירקות חתוכים, גבינה בולגרית, זיתים, שמן זית", steps: ["חותכים את כל הירקות לקוביות", "מפזרים מעל גבינה בולגרית וזיתים", "מתבלים בשמן זית ולימון"] },
+        { title: "עוגת שוקולד", img: "https://images.unsplash.com/photo-1564031350635-27c6a2127347?w=400", ing: "שוקולד מריר, ביצים, סוכר, קמח", steps: ["ממיסים שוקולד עם חמאה", "מוסיפים סוכר, ביצים וקמח ומערבבים", "אופים ב-180 מעלות כ-25 דקות"] },
+        { title: "אורז לבן מושלם", img: "https://images.unsplash.com/photo-1516684732162-798a0062be99?w=400", ing: "כוס אורז, 2 כוסות מים, מלח, שמן", steps: ["מטגנים את האורז עם מעט שמן כשתי דקות", "מוסיפים מים רותחים ומלח", "סוגרים את הסיר ומבשלים על אש קטנה 20 דקות"] },
+        { title: "קציצות ברוטב", img: "https://images.unsplash.com/photo-1529006557810-274b9b2fc783?w=400", ing: "בשר טחון, בצל, לחם סחוט, תבלינים, רסק", steps: ["מערבבים את הבשר עם בצל ותבלינים ויוצרים כדורים", "מכינים רוטב עגבניות בסיר רחב", "מבשלים את הקציצות בתוך הרוטב כחצי שעה"] },
+        { title: "פיצה ביתית", img: "https://images.unsplash.com/photo-1513104890138-7c749659a591?w=400", ing: "בצק פיצה, רוטב עגבניות, גבינה צהובה", steps: ["מרדדים את הבצק על תבנית אפייה", "מורחים רוטב ומפזרים המון גבינה ותוספות", "אופים בחום גבוה עד שהגבינה מבעבעת"] },
+        { title: "פנקייק", img: "https://images.unsplash.com/photo-1528207776546-365bb710ee93?w=400", ing: "כוס חלב, כוס קמח, ביצה, כף סוכר", steps: ["מערבבים את כל המרכיבים לבלילה חלקה", "משמנים מחבת ומטגנים עיגולים קטנים", "הופכים כשמופיעות בועות על הצד העליון"] }
     ];
 
     function showScreen(id) {
@@ -147,23 +156,38 @@
         document.body.classList.toggle('dark-mode', isDarkMode);
     }
 
+    function register() {
+        const u = document.getElementById('username').value.trim();
+        const p = document.getElementById('password').value;
+        if (!u || !p) return alert("נא להזין שם וסיסמה");
+        
+        let users = JSON.parse(localStorage.getItem('users')) || [];
+        if (users.find(x => x.user === u)) return alert("שם משתמש זה כבר קיים");
+        
+        users.push({ user: u, pass: p, delay: 3 });
+        localStorage.setItem('users', JSON.stringify(users));
+        alert("נרשמת בהצלחה! עכשיו תוכלי להיכנס.");
+    }
+
     function login() {
-        const u = document.getElementById('username').value;
+        const u = document.getElementById('username').value.trim();
         const p = document.getElementById('password').value;
         if (!u || !p) return alert("נא להזין שם וסיסמה");
 
         let users = JSON.parse(localStorage.getItem('users')) || [];
-        let user = users.find(x => x.user === u);
-        if (user && user.pass !== p) return alert("סיסמה שגויה");
-        if (!user) {
-            user = { user: u, pass: p, delay: 3 };
-            users.push(user);
-            localStorage.setItem('users', JSON.stringify(users));
-        }
+        let user = users.find(x => x.user === u && x.pass === p);
+        
+        if (!user) return alert("שם משתמש או סיסמה שגויים");
+
         currentUser = user;
         document.getElementById('delayInput').value = currentUser.delay;
         document.getElementById('welcomeMsg').innerText = `המתכונים של ${u}`;
-        if (!localStorage.getItem('recipes_' + u)) localStorage.setItem('recipes_' + u, JSON.stringify(masterRecipes));
+        
+        // טעינת מתכונים ראשונית אם אין למשתמש
+        if (!localStorage.getItem('recipes_' + u)) {
+            localStorage.setItem('recipes_' + u, JSON.stringify(masterRecipes));
+        }
+        
         renderRecipes();
         showScreen('listScreen');
     }
@@ -174,7 +198,6 @@
         const recipes = JSON.parse(localStorage.getItem('recipes_' + currentUser.user)) || [];
         
         list.innerHTML = '';
-        
         const filtered = recipes.filter(r => r.title.toLowerCase().includes(query));
         
         if (filtered.length === 0) {
@@ -245,13 +268,15 @@
 
     function startReading() {
         const steps = JSON.parse(document.getElementById('viewInstructions').dataset.steps);
-        const delay = document.getElementById('delayInput').value * 1000;
+        const delay = (document.getElementById('delayInput').value || 3) * 1000;
         synth.cancel();
         let i = 0;
         function speak() {
             if (i < steps.length) {
                 document.querySelectorAll('#viewInstructions p').forEach(p => p.className = '');
-                document.getElementById(`step-${i}`).className = 'active-step';
+                const currentEl = document.getElementById(`step-${i}`);
+                if (currentEl) currentEl.className = 'active-step';
+                
                 const u = new SpeechSynthesisUtterance(steps[i]);
                 u.lang = 'he-IL';
                 u.onend = () => { i++; if (i < steps.length) setTimeout(speak, delay); };
